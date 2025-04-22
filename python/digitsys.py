@@ -1,7 +1,7 @@
-base=7
+base=2
 x = int(input())
+prdigit=''
 while x > 0:
-  digit=x%base
-  print(digit, end='')
-  x//=base
-  
+  prdigit = str(x % base) + prdigit
+  x=x//base
+print (prdigit)
