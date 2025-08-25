@@ -19,7 +19,7 @@ def test_sort (sort_algorithm):
   print("OK" if A == A_sorted else "Fail")
 
   print("testCase #2: ", end="")
-  A = list(range(10. 20)) + list(range(0, 10))
+  A = list(range(10, 20)) + list(range(0, 10))
   A_sorted = list(range(20)
   sort_algorithm(A)
   print("OK" if A == A_sorted else "Fail")
