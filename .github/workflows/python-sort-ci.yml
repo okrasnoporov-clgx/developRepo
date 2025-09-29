@@ -1,8 +1,7 @@
 name: Python Sort CI
 
 on:
-  push:
-    branches: [ "master"]
+  
 
 jobs:
   run-python:
@@ -19,4 +18,4 @@ jobs:
 
       - name: Run Python Sort script
         run: |
-          python python/sort.py          
+          python python/recursion.py          
