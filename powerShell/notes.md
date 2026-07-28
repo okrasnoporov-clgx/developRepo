@@ -9,3 +9,8 @@ Persistent:
 [Enable Scripts]:
     Get-ExecutionPolicy -List
     Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+
+
+### kubectl Editor setup
+[Environment]::SetEnvironmentVariable("KUBE_EDITOR", "vim", "User")
+
