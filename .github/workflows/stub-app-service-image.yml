@@ -24,14 +24,14 @@ jobs:
       - name: Read project version
         id: version
         run: |
-              VERSION=$(
-                python -c '
-                import tomllib
-                with open("python/stubAppServiceP/pyproject.toml", "rb") as file:
-                  project = tomllib.load(file)
-                  print(project["project"]["version"])
-                ')
-              echo "value=$VERSION" >> "$GITHUB_OUTPUT"
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import tomllib
+
+          with open("python/stubAppServiceP/pyproject.toml", "rb") as file:
+              project = tomllib.load(file)
+
+          print(f"value={project['project']['version']}")
+          PY
 
       - name: Log in to GitHub Container Registry
         uses: docker/login-action@v3
