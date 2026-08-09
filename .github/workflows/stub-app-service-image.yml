@@ -55,11 +55,23 @@ jobs:
             org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
             org.opencontainers.image.revision=${{ github.sha }}    
 
-      - name: Build and push image
+      - name: Build image for vulnerability scan
         uses: docker/build-push-action@v7
         with:
           context: ./python/stubAppServiceP
           file: ./python/stubAppServiceP/Dockerfile
-          push: true
+          load: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
+
+      - name: Scan image for high and critical vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
+          format: table
+          exit-code: "1"
+          severity: HIGH,CRITICAL
+          vuln-type: os,library
+
+      - name: Push scanned image to GitHub Container Registry
+        run: docker push --all-tags "${{ env.IMAGE_NAME }}"
