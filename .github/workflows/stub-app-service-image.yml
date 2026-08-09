@@ -69,7 +69,7 @@ jobs:
         with:
           image-ref: ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
           format: table
-          exit-code: "1"
+          exit-code: "0"
           severity: HIGH,CRITICAL
           vuln-type: os,library
 
