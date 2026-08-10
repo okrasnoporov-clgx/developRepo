@@ -5,4 +5,5 @@ description = "Stub of FastAPI service"
 requires-python = ">=3.13"
 dependencies = [
     "fastapi[standard]",
+    "pymongo",
 ]
