@@ -1,0 +1,35 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stub-app-service
+  labels:
+    app.kubernetes.io/name: stub-app-service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stub-app-service
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: stub-app-service
+    spec:
+      containers:
+        - name: stub-app-service
+          image: ghcr.io/okrasnoporov-clgx/stub-app-service:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8000
+          readinessProbe:
+            httpGet:
+              path: /alpha/v1/info
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /alpha/v1/info
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
