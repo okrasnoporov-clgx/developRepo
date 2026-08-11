@@ -22,6 +22,9 @@ spec:
           ports:
             - name: http
               containerPort: 8000
+          env:
+            - name: MONGO_URI
+              value: mongodb://mongodb:27017
           readinessProbe:
             httpGet:
               path: /alpha/v1/info
