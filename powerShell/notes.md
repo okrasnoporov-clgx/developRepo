@@ -14,3 +14,6 @@ Persistent:
 ### kubectl Editor setup
 [Environment]::SetEnvironmentVariable("KUBE_EDITOR", "vim", "User")
 
+
+### Network testing
+Test-NetConnection -ComputerName localhost -Port 27017
