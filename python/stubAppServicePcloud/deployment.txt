@@ -1,0 +1,427 @@
+$env:POWERSHELL_TELEMETRY_OPTOUT='1'; 
+az webapp config show --resource-group rg-dev-webservice --name app-dev-webservice `
+--query "{linuxFxVersion:linuxFxVersion,appCommandLine:appCommandLine}" `
+--output json; 
+
+az webapp config appsettings list --resource-group rg-dev-webservice `
+--name app-dev-webservice --query "[].name" --output tsv; 
+
+
+az webapp deployment source show --resource-group rg-dev-webservice `
+--name app-dev-webservice --output json
+
+
+
+
+
+###---------------------------------------------------------------------------------------------
+
+
+# Deploy FastAPI source to an existing Azure Linux Web App (no Docker).
+# Prerequisite: az login
+
+$ResourceGroup = 'rg-dev-webservice'
+$WebAppName = 'app-dev-webservice'
+$ProjectDir = Join-Path $PSScriptRoot '.'
+$ZipFile = Join-Path $env:TEMP "$WebAppName.zip"
+
+# $env:MONGO_URI = 'mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority'
+if ([string]::IsNullOrWhiteSpace($env:MONGO_URI)) {
+    throw 'Set MONGO_URI in the current PowerShell session before deployment.'
+}
+
+# The service uses these environment variables on Azure.
+# SCM_DO_BUILD_DURING_DEPLOYMENT makes App Service install dependencies from pyproject.toml.
+az webapp config appsettings set `
+    --resource-group $ResourceGroup `
+    --name $WebAppName `
+    --settings `
+        "MONGO_URI=$env:MONGO_URI" `
+        'MONGO_DB=stub_db' `
+        'MONGO_COLLECTION=records' `
+        'SCM_DO_BUILD_DURING_DEPLOYMENT=true'
+
+# FastAPI is available through fastapi[standard]; App Service forwards HTTP to port 8000.
+az webapp config set `
+    --resource-group $ResourceGroup `
+    --name $WebAppName `
+    --startup-file 'python -m uvicorn service:app --host 0.0.0.0 --port 8000'
+
+# Package only this service directory, then trigger a remote Oryx build and deploy it.
+if (Test-Path $ZipFile) {
+    Remove-Item -LiteralPath $ZipFile
+}
+Compress-Archive -Path (Join-Path $ProjectDir '*') -DestinationPath $ZipFile -Force
+
+az webapp deploy `
+    --resource-group $ResourceGroup `
+    --name $WebAppName `
+    --src-path $ZipFile `
+    --type zip `
+    --async false
+
+# Verify the deployed service.
+$HostName = az webapp show --resource-group $ResourceGroup --name $WebAppName --query defaultHostName --output tsv
+Invoke-RestMethod "https://$HostName/alpha/v1/info"
+
+--------------------
+Simple deployment (WIN)
+
+$env:MONGO_URI = 'mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority'
+
+$env:MONGO_URI = az cosmosdb keys list `
+  --name cosmos-dev-webservice `
+  --resource-group rg-dev-webservice `
+  --type connection-strings `
+  --query "connectionStrings[0].connectionString" `
+  --output tsv
+
+
+#!!!!! There is a problem with & symbol in connection string!!!!
+
+az webapp config appsettings set `
+--resource-group rg-dev-webservice `
+--name app-dev-webservice `
+--settings `
+"MONGODB_CONNECTION_STRING=$($env:MONGO_URI)" `
+"MONGODB_DATABASE=appdb" `
+"MONGO_URI=$($env:MONGO_URI)" `
+"MONGO_DB=appdb" `
+"MONGO_COLLECTION=records" `
+"WEBSITES_PORT=8000"
+
+#!!!!! deprecated !!!!!
+az webapp up `
+  --resource-group rg-dev-webservice `
+  --name app-dev-webservice `
+  --runtime 'PYTHON:3.13'
+
+OUTPUT:
+
+This command has been deprecated and will be removed in a future release. Use 'webapp create and webapp deploy' instead.
+No --os-type specified. Defaulting to 'Linux'.
+Webapp 'app-dev-webservice' already exists. The command will deploy contents to the existing app.
+Creating AppServicePlan 'sp-dev-webservice' in 'centralus' or Updating if already exists
+Creating App Service Plan 'sp-dev-webservice' (Linux, SKU: F1).
+Creating zip with contents of dir C:\work\developRepo\python\stubAppServicePcloud ...
+Getting scm site credentials for zip deployment
+Starting zip deployment. This operation can take a while to complete ...
+Warming up Kudu before deployment.
+Deployment endpoint responded with status code 202
+Polling the status of async deployment. Start Time: 2026-08-12 15:46:48.085226+00:00 UTC
+Status: Building the app... Time: 1(s)
+Status: Building the app... Time: 17(s)
+Status: Build successful. Time: 33(s)
+Status: Starting the site... Time: 48(s)
+Tip: run 'az webapp troubleshoot status --name app-dev-webservice --resource-group rg-dev-webservice' to see per-instance runtime status and recent startup summary.
+Status: Starting the site... Time: 64(s)
+Status: Site started successfully. Time: 79(s)
+You can launch the app at http://app-dev-webservice.azurewebsites.net
+Tip: run 'az webapp troubleshoot status --name app-dev-webservice --resource-group rg-dev-webservice' to see per-instance runtime status and recent startup summary.
+Setting 'az webapp up' default arguments for current directory. Manage defaults with 'az configure --scope local'
+--resource-group/-g default: rg-dev-webservice
+--sku default: F1
+--plan/-p default: sp-dev-webservice
+--location/-l default: centralus
+--name/-n default: app-dev-webservice
+{
+  "URL": "http://app-dev-webservice.azurewebsites.net",
+  "appserviceplan": "sp-dev-webservice",
+  "location": "centralus",
+  "name": "app-dev-webservice",
+  "os": "Linux",
+  "resourcegroup": "rg-dev-webservice",
+  "runtime_version": "PYTHON|3.13",
+  "runtime_version_detected": "-",
+  "sku": "FREE",
+  "src_path": "C:\\work\\developRepo\\python\\stubAppServicePcloud"
+}
+
+
+
+PS C:\work\developRepo\python\stubAppServicePcloud> az webapp up `
+>>   --resource-group rg-dev-webservice `
+>>   --name app-dev-webservice `
+>>   --runtime 'PYTHON:3.13'
+This command has been deprecated and will be removed in a future release. Use 'webapp create and webapp deploy' instead.
+No --os-type specified. Defaulting to 'Linux'.
+Webapp 'app-dev-webservice' already exists. The command will deploy contents to the existing app.
+Creating AppServicePlan 'sp-dev-webservice' in 'centralus' or Updating if already exists
+Creating App Service Plan 'sp-dev-webservice' (Linux, SKU: F1).
+Creating zip with contents of dir C:\work\developRepo\python\stubAppServicePcloud ...
+Getting scm site credentials for zip deployment
+Starting zip deployment. This operation can take a while to complete ...
+Warming up Kudu before deployment.
+Deployment endpoint responded with status code 202
+Polling the status of async deployment. Start Time: 2026-08-12 15:46:48.085226+00:00 UTC
+Status: Building the app... Time: 1(s)
+Status: Building the app... Time: 17(s)
+Status: Build successful. Time: 33(s)
+Status: Starting the site... Time: 48(s)
+Tip: run 'az webapp troubleshoot status --name app-dev-webservice --resource-group rg-dev-webservice' to see per-instance runtime status and recent startup summary.
+Status: Starting the site... Time: 64(s)
+Status: Site started successfully. Time: 79(s)
+You can launch the app at http://app-dev-webservice.azurewebsites.net
+Tip: run 'az webapp troubleshoot status --name app-dev-webservice --resource-group rg-dev-webservice' to see per-instance runtime status and recent startup summary.
+Setting 'az webapp up' default arguments for current directory. Manage defaults with 'az configure --scope local'
+--resource-group/-g default: rg-dev-webservice
+--sku default: F1
+--plan/-p default: sp-dev-webservice
+--location/-l default: centralus
+--name/-n default: app-dev-webservice
+{
+  "URL": "http://app-dev-webservice.azurewebsites.net",
+  "appserviceplan": "sp-dev-webservice",
+  "location": "centralus",
+  "name": "app-dev-webservice",
+  "os": "Linux",
+  "resourcegroup": "rg-dev-webservice",
+  "runtime_version": "PYTHON|3.13",
+  "runtime_version_detected": "-",
+  "sku": "FREE",
+  "src_path": "C:\\work\\developRepo\\python\\stubAppServicePcloud"
+}
+
+
+
+
+
+
+Invoke-RestMethod 'https://app-dev-webservice.azurewebsites.net/alpha/v1/info'
+
+service status server
+------- ------ ------
+alpha   ok     FastAPI
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+--------------------
+Simple deployment (LINUX)
+
+$env:MONGO_URI = 'mongodb+srv://<user>:<password>@<cluster>/<database>?retryWrites=true&w=majority'
+
+export MONGO_URI="$(az cosmosdb keys list \
+  --name cosmos-dev-webservice \
+  --resource-group rg-dev-webservice \
+  --type connection-strings \
+  --query "connectionStrings[0].connectionString" \
+  --output tsv)"
+
+
+#!!!!! There is NO problem with & symbol in connection string!!!!
+
+az webapp config appsettings set \
+--resource-group rg-dev-webservice \
+--name app-dev-webservice \
+--settings \
+"MONGODB_CONNECTION_STRING=$MONGO_URI" \
+"MONGODB_DATABASE=appdb" \
+"MONGO_URI=$MONGO_URI" \
+"MONGO_DB=appdb" \
+"MONGO_COLLECTION=records" \
+"WEBSITES_PORT=8000"
+
+OUTPUT:
+[
+  {
+    "name": "MONGODB_CONNECTION_STRING",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "MONGODB_DATABASE",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "SCM_DO_BUILD_DURING_DEPLOYMENT",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "WEBSITES_PORT",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "MONGO_URI",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "MONGO_DB",
+    "slotSetting": false,
+    "value": null
+  },
+  {
+    "name": "MONGO_COLLECTION",
+    "slotSetting": false,
+    "value": null
+  }
+]
+
+
+
+
+
+az webapp config set \
+  --resource-group rg-dev-webservice \
+  --name app-dev-webservice \
+  --startup-file 'python -m uvicorn service:app --host 0.0.0.0 --port 8000'
+
+OUTPUT:
+{
+  "acrUseManagedIdentityCreds": false,
+  "acrUserManagedIdentityId": null,
+  "alwaysOn": false,
+  "apiDefinition": null,
+  "apiManagementConfig": null,
+  "appCommandLine": "python -m uvicorn service:app --host 0.0.0.0 --port 8000",
+  "appSettings": null,
+  "autoHealEnabled": false,
+  "autoHealRules": null,
+  "autoSwapSlotName": null,
+  "azureStorageAccounts": {},
+  "connectionStrings": null,
+  "cors": null,
+  "defaultDocuments": [
+    "Default.htm",
+    "Default.html",
+    "Default.asp",
+    "index.htm",
+    "index.html",
+    "iisstart.htm",
+    "default.aspx",
+    "index.php",
+    "hostingstart.html"
+  ],
+  "detailedErrorLoggingEnabled": false,
+  "documentRoot": null,
+  "elasticWebAppScaleLimit": 0,
+  "experiments": {
+    "rampUpRules": []
+  },
+  "ftpsState": "Disabled",
+  "functionAppScaleLimit": null,
+  "functionsRuntimeScaleMonitoringEnabled": false,
+  "handlerMappings": null,
+  "healthCheckPath": null,
+  "http20Enabled": false,
+  "http20ProxyFlag": 0,
+  "httpLoggingEnabled": false,
+  "id": "/subscriptions/4b5***********2d2c/resourceGroups/rg-dev-webservice/providers/Microsoft.Web/sites/app-dev-webservice",
+  "ipSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "ipSecurityRestrictionsDefaultAction": "Allow",
+  "javaContainer": null,
+  "javaContainerVersion": null,
+  "javaVersion": null,
+  "keyVaultReferenceIdentity": null,
+  "kind": null,
+  "limits": null,
+  "linuxFxVersion": "PYTHON|3.11",
+  "loadBalancing": "LeastRequests",
+  "localMySqlEnabled": false,
+  "logsDirectorySizeLimit": 35,
+  "machineKey": null,
+  "managedPipelineMode": "Integrated",
+  "managedServiceIdentityId": null,
+  "metadata": null,
+  "minTlsCipherSuite": null,
+  "minTlsVersion": "1.2",
+  "minimumElasticInstanceCount": 1,
+  "name": "app-dev-webservice",
+  "netFrameworkVersion": "v4.0",
+  "nodeVersion": "",
+  "numberOfWorkers": 1,
+  "phpVersion": "",
+  "powerShellVersion": "",
+  "preWarmedInstanceCount": 0,
+  "publicNetworkAccess": "Enabled",
+  "publishingUsername": "$app-dev-webservice",
+  "push": null,
+  "pythonVersion": "",
+  "remoteDebuggingEnabled": false,
+  "remoteDebuggingVersion": "VS2022",
+  "requestTracingEnabled": false,
+  "requestTracingExpirationTime": null,
+  "resourceGroup": "rg-dev-webservice",
+  "scmIpSecurityRestrictions": [
+    {
+      "action": "Allow",
+      "description": "Allow all access",
+      "headers": null,
+      "ipAddress": "Any",
+      "name": "Allow all",
+      "priority": 2147483647,
+      "subnetMask": null,
+      "subnetTrafficTag": null,
+      "tag": null,
+      "vnetSubnetResourceId": null,
+      "vnetTrafficTag": null
+    }
+  ],
+  "scmIpSecurityRestrictionsDefaultAction": "Allow",
+  "scmIpSecurityRestrictionsUseMain": false,
+  "scmMinTlsVersion": "1.2",
+  "scmType": "None",
+  "systemData": null,
+  "tracingOptions": null,
+  "type": "Microsoft.Web/sites",
+  "use32BitWorkerProcess": true,
+  "virtualApplications": [
+    {
+      "physicalPath": "site\\wwwroot",
+      "preloadEnabled": false,
+      "virtualDirectories": null,
+      "virtualPath": "/"
+    }
+  ],
+  "vnetName": "",
+  "vnetPrivatePortsCount": 0,
+  "vnetRouteAllEnabled": false,
+  "webSocketsEnabled": false,
+  "websiteTimeZone": null,
+  "windowsFxVersion": null,
+  "xManagedServiceIdentityId": null
+}
+
+az webapp up \
+  --resource-group rg-dev-webservice \
+  --name app-dev-webservice \
+  --runtime 'PYTHON:3.13'
+
