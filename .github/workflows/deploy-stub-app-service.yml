@@ -1,0 +1,49 @@
+name: Deploy stub App Service
+
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - "python/stubAppServicePcloud/**"
+      - ".github/workflows/deploy-stub-app-service.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: deploy-stub-app-service-production
+  cancel-in-progress: false
+
+env:
+  AZURE_WEBAPP_NAME: app-dev-webservice
+  AZURE_WEBAPP_PACKAGE_PATH: python/stubAppServicePcloud
+
+jobs:
+  deploy:
+    name: Deploy source package to Azure App Service
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      # This checks that the source package is installable. App Service performs
+      # the actual Oryx build because SCM_DO_BUILD_DURING_DEPLOYMENT=true.
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.13"
+
+      - name: Install dependencies
+        run: python -m pip install -r requirements.txt
+        working-directory: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
+
+      - name: Deploy to Azure Web App
+        uses: azure/webapps-deploy@v3
+        with:
+          app-name: ${{ env.AZURE_WEBAPP_NAME }}
+          publish-profile: ${{ secrets.AZURE_WEBAPP_PUBLISH_PROFILE }}
+          package: ${{ env.AZURE_WEBAPP_PACKAGE_PATH }}
