@@ -1,0 +1,4 @@
+AzureWebApp@1
+AzureRmWebAppDeployment@4 (старый)
+AzureWebAppContainer@1
+AzureAppServiceSettings@1

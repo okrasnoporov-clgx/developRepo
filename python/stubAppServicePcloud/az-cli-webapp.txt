@@ -1,0 +1,4 @@
+az webapp config appsettings set	--resource-group myrg'	--name appName'	`--settings VAR1=VAL1, VAR2=val, etc	
+az webapp config set	--resource-group myrg'	--name appName'	`--startup-file 'python -m uvicorn service:app….'	
+az webapp up (deprecated)	--resource-group myrg'	--name appName'	`--runtime 'PYTHON:3.13'	
+az webapp deploy	--resource-group myrg'	--name appName'	--src-path ./publish.zip'	--type zip'
