@@ -13,7 +13,8 @@ app = func.FunctionApp()
 @app.blob_trigger(
     arg_name="input_blob",
     path="input/{name}.txt",
-    connection="AzureWebJobsStorage"
+    connection="AzureWebJobsStorage",
+    source="EventGrid"
 )
 def process_file(input_blob: func.InputStream):
     
