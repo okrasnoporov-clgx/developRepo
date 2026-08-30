@@ -1,0 +1,14 @@
+### AWS SETUP
+
+$env:AWS_ACCESS_KEY_ID="AKI*****232"
+$env:AWS_SECRET_ACCESS_KEY="3nQ**********uCU+"
+$env:AWS_REGION="eu-central-1"
+
+$env:S3_BUCKET_NAME="s3******-01"
+$env:S3_FOLDER="folder001"
+
+
+### DEPENDENCIES
+
+pip install boto3
+
