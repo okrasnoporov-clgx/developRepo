@@ -1,12 +1,12 @@
 import os
 import sys
-import boto3 #AWS SDK for Python
-
+import boto3
 
 file_name = sys.argv[1]
 
 bucket_name = os.environ["S3_BUCKET_NAME"]
 folder = os.environ["S3_FOLDER"]
+account_id = os.environ["AWS_ACCOUNT_ID"]
 
 session = boto3.Session(
     aws_access_key_id=os.environ["AWS_ACCESS_KEY_ID"],
@@ -21,8 +21,10 @@ object_key = f"{folder}/{os.path.basename(file_name)}"
 s3.upload_file(
     file_name,
     bucket_name,
-    object_key
+    object_key,
+    ExtraArgs={
+        "ExpectedBucketOwner": account_id
+    }
 )
 
 print(f"Uploaded: s3://{bucket_name}/{object_key}")
-
