@@ -44,3 +44,27 @@ def create_record(payload: Dict[str, Any] = Body(...)):
         "fields_count": len(payload)
     }
 
+
+@app.get("/db/v1/list", tags=["Database"])
+def list_records():
+    try:
+        docs = list(collection.find())
+    except Exception as e:
+        raise HTTPException(
+            status_code=500,
+            detail=f"Failed to fetch records from MongoDB: {str(e)}"
+        )
+
+    serializable_docs = []
+    for doc in docs:
+        doc_copy = dict(doc)
+        if "_id" in doc_copy:
+            doc_copy["_id"] = str(doc_copy["_id"])
+        serializable_docs.append(doc_copy)
+
+    return {
+        "status": "success",
+        "count": len(serializable_docs),
+        "records": serializable_docs
+    }
+
