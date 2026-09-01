@@ -1,4 +1,4 @@
-name: Deploy stub App Service
+name: Deploy stubAppServicePcloud to Azure WebApp
 
 on:
   push:
