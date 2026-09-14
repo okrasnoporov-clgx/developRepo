@@ -1,0 +1,45 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stub-app-service-porc-cloud
+  namespace: dev
+  labels:
+    app.kubernetes.io/name: stub-app-service-porc-cloud
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: stub-app-service-porc-cloud
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: stub-app-service-porc-cloud
+    spec:
+      containers:
+        - name: stub-app-service-porc-cloud
+          image: ghcr.io/okrasnoporov-clgx/stub-app-service-porc-cloud:0.0.1
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 8001
+          env:
+            - name: SERVICES
+              value: '[{"name":"alpha","url":"http://alpha-service:8000"}]'
+            - name: SERVICE_INFO_PATH
+              value: "/alpha/v1/info"
+            - name: INFO_ENDPOINT
+              value: "/services/v1/info"
+            - name: REQUEST_TIMEOUT_SECONDS
+              value: "5"
+          readinessProbe:
+            httpGet:
+              path: /services/v1/info
+              port: http
+            initialDelaySeconds: 3
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /services/v1/info
+              port: http
+            initialDelaySeconds: 10
+            periodSeconds: 20
