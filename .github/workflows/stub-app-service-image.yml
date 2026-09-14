@@ -14,7 +14,7 @@ env:
   IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/stub-app-service
 
 jobs:
-  build-and-push:
+  build-and-push-stub-app-service:
     runs-on: ubuntu-latest
 
     steps:
@@ -60,6 +60,71 @@ jobs:
         with:
           context: ./python/stubAppServiceP
           file: ./python/stubAppServiceP/Dockerfile
+          load: true
+          tags: ${{ steps.metadata.outputs.tags }}
+          labels: ${{ steps.metadata.outputs.labels }}
+
+      - name: Scan image for high and critical vulnerabilities
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ env.IMAGE_NAME }}:${{ steps.version.outputs.value }}
+          format: table
+          exit-code: "0"
+          severity: HIGH,CRITICAL
+          vuln-type: os,library
+
+      - name: Push scanned image to GitHub Container Registry
+        run: docker push --all-tags "${{ env.IMAGE_NAME }}"
+
+  build-and-push-stub-porc-service:
+    runs-on: ubuntu-latest
+
+    env:
+      IMAGE_NAME: ghcr.io/${{ github.repository_owner }}/stub-app-service-porc-cloud
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+
+      - name: Read project version
+        id: version
+        run: |
+          python - <<'PY' >> "$GITHUB_OUTPUT"
+          import tomllib
+
+          with open("python/stubAppServicePorcCloud/pyproject.toml", "rb") as file:
+              project = tomllib.load(file)
+
+          print(f"value={project['project']['version']}")
+          PY
+
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v4
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract image metadata
+        id: metadata
+        uses: docker/metadata-action@v6
+        with:
+          images: ${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ steps.version.outputs.value }}
+            type=sha
+          labels: |
+            org.opencontainers.image.title=Stub app service orchestrator
+            org.opencontainers.image.version=${{ steps.version.outputs.value }}
+            org.opencontainers.image.description=FastAPI service information proxy
+            org.opencontainers.image.source=${{ github.server_url }}/${{ github.repository }}
+            org.opencontainers.image.revision=${{ github.sha }}
+
+      - name: Build image for vulnerability scan
+        uses: docker/build-push-action@v7
+        with:
+          context: ./python/stubAppServicePorcCloud
+          file: ./python/stubAppServicePorcCloud/Dockerfile
           load: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
