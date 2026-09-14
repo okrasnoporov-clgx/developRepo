@@ -18,4 +18,12 @@ spec:
                 port:
                   name: http
 
+          - path: /services
+            pathType: Prefix
+            backend:
+              service:
+                name: stub-app-service-porc-cloud
+                port:
+                  name: http
+
 

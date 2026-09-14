@@ -17,7 +17,7 @@ collection = db[MONGO_COLLECTION]
 
 @app.get("/alpha/v1/info", tags=["Service info"])
 def get_info():
-    return {"service": "alpha", "status": "ok", "server": "FastAPI"}
+    return {"service": "alpha", "status": "ok", "server": "FastAPI", "version": "0.0.3"}
 
 
 @app.post("/db/v1/record", tags=["Database"])
