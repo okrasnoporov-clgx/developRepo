@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: stub-app-service-porc-cloud
-          image: ghcr.io/okrasnoporov-clgx/stub-app-service-porc-cloud:0.0.1
+          image: ghcr.io/okrasnoporov-clgx/stub-app-service-porc-cloud:0.0.2
           imagePullPolicy: Always
           ports:
             - name: http
