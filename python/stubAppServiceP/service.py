@@ -17,12 +17,15 @@ collection = db[MONGO_COLLECTION]
 
 @app.get("/alpha/v1/info", tags=["Service info"])
 def get_info():
-    return {"service": "alpha", "status": "ok", "server": "FastAPI", "version": "0.0.4"}
+    return {"service": "alpha", "status": "ok", "server": "FastAPI", "version": "0.0.5"}
 
 @app.get("/beta/v1/info", tags=["Service info"])
 def get_info():
-    return {"service": "beta", "status": "ok", "server": "FastAPI", "version": "0.0.4"}
+    return {"function": "beta"}
 
+@app.get("/gamma/v1/info", tags=["Service info"])
+def get_info():
+    return {"function": "gamma"}
 
 @app.post("/db/v1/record", tags=["Database"])
 def create_record(payload: Dict[str, Any] = Body(...)):
