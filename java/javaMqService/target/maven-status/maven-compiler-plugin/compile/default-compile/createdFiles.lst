@@ -1,0 +1,4 @@
+com\example\javamqservice\JavaMqService$QueueMonitor.class
+com\example\javamqservice\JavaMqService$InfoHandler.class
+com\example\javamqservice\JavaMqService.class
+com\example\javamqservice\JavaMqService$QueueStateHandler.class
