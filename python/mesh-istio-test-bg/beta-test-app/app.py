@@ -65,7 +65,7 @@ class AppHandler(BaseHTTPRequestHandler):
     h1 {{ color: #2457a7; font-size: 1.5rem; }}
     table {{ border-collapse: collapse; width: 100%; }}
     th, td {{ border: 1px solid #d5deea; padding: 12px 16px; text-align: left; }}
-    th {{ background: #2457a7; color: white; width: 35%; }}
+    th {{ background: #7e57c2; color: white; width: 35%; }}
     tr:nth-child(even) td {{ background: #e7eef8; }}
   </style>
 </head>
@@ -75,6 +75,7 @@ class AppHandler(BaseHTTPRequestHandler):
     <table>
       <tr><th>Name</th><td>{escape(APP_NAME)}</td></tr>
       <tr><th>Version</th><td>{escape(APP_VERSION)}</td></tr>
+      <tr><th>SVC</th><td>{escape(SVC)}</td></tr>
     </table>
   </main>
 </body>
