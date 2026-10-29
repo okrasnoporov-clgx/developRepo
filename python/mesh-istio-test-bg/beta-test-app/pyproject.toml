@@ -1,0 +1,5 @@
+[project]
+name = "beta-test-app"
+version = "0.0.1"
+description = "HTTP service for testing communication with alpha in a cluster"
+requires-python = ">=3.10"
