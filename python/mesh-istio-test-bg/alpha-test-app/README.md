@@ -13,7 +13,7 @@ The `/v1/info` endpoint returns the same information as JSON.
 Run locally without a container (PowerShell):
 
 ```powershell
-cd python\alpha-test-app
+cd python\mesh-istio-test-bg\alpha-test-app
 python app.py
 ```
 

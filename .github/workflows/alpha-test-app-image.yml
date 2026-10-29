@@ -27,7 +27,7 @@ jobs:
           python - <<'PY' >> "$GITHUB_OUTPUT"
           import tomllib
 
-          with open("python/alpha-test-app/pyproject.toml", "rb") as file:
+          with open("python/mesh-istio-test-bg/alpha-test-app/pyproject.toml", "rb") as file:
               project = tomllib.load(file)
 
           print(f"value={project['project']['version']}")
@@ -61,8 +61,8 @@ jobs:
       - name: Build and publish image
         uses: docker/build-push-action@v7
         with:
-          context: ./python/alpha-test-app
-          file: ./python/alpha-test-app/Dockerfile
+          context: ./python/mesh-istio-test-bg/alpha-test-app
+          file: ./python/mesh-istio-test-bg/alpha-test-app/Dockerfile
           push: true
           tags: ${{ steps.metadata.outputs.tags }}
           labels: ${{ steps.metadata.outputs.labels }}
