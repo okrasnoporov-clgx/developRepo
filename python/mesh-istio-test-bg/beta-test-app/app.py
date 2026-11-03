@@ -82,7 +82,16 @@ class AppHandler(BaseHTTPRequestHandler):
     </table>
     <hr>
     <footer>Test Beta application</footer>
+    <table>
+      <tr><th>Alpha-Response</th><td id="alpha-response">Loading...</td></tr>
+    </table>
   </main>
+  <script>
+    fetch("/v1/alpha/info")
+      .then(response => response.text())
+      .then(value => document.getElementById("alpha-response").textContent = value)
+      .catch(() => document.getElementById("alpha-response").textContent = "Unable to fetch /v1/alpha/info");
+  </script>
 </body>
 </html>
 """
