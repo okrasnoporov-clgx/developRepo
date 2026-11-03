@@ -1,5 +1,6 @@
 import json
 import os
+from datetime import date
 from html import escape
 from http.server import BaseHTTPRequestHandler, HTTPServer
 from urllib.error import HTTPError, URLError
@@ -65,8 +66,9 @@ class AppHandler(BaseHTTPRequestHandler):
     h1 {{ color: #2457a7; font-size: 1.5rem; }}
     table {{ border-collapse: collapse; width: 100%; }}
     th, td {{ border: 1px solid #d5deea; padding: 12px 16px; text-align: left; }}
-    th {{ background: #7e57c2; color: white; width: 35%; }}
+    th {{ background: #6842a5; color: white; width: 35%; }}
     tr:nth-child(even) td {{ background: #e7eef8; }}
+    hr {{ border: 0; border-top: 1px solid #d5deea; margin: 20px 0 12px; }}
   </style>
 </head>
 <body>
@@ -76,7 +78,10 @@ class AppHandler(BaseHTTPRequestHandler):
       <tr><th>Name</th><td>{escape(APP_NAME)}</td></tr>
       <tr><th>Version</th><td>{escape(APP_VERSION)}</td></tr>
       <tr><th>SVC</th><td>{escape(SVC)}</td></tr>
+      <tr><th>Current date</th><td>{escape(date.today().isoformat())}</td></tr>
     </table>
+    <hr>
+    <footer>Test Beta application</footer>
   </main>
 </body>
 </html>

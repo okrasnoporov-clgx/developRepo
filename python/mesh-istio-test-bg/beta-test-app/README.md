@@ -22,6 +22,7 @@ Run locally without a container (PowerShell):
 cd python\mesh-istio-test-bg\beta-test-app
 $env:PORT = "8001"
 $env:SVC = "localhost"
+
 python app.py
 ```
 
