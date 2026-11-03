@@ -25,28 +25,32 @@ class AppHandler(BaseHTTPRequestHandler):
         body = json.dumps(data).encode("utf-8")
         self.send_body(status, body, "application/json; charset=utf-8")
 
+    def get_alpha_info(self) -> tuple[int, bytes, str]:
+        try:
+            with urlopen(f"http://{SVC}:8000/v1/info", timeout=5) as response:
+                body = response.read()
+                status = response.status
+                content_type = response.headers.get(
+                    "Content-Type", "application/json"
+                )
+        except (HTTPError, URLError, TimeoutError) as error:
+            self.log_error(
+                "Failed to read alpha service info from %s: %s", SVC, error
+            )
+            status = 502
+            body = json.dumps(
+                {"error": "Failed to read alpha service info"}
+            ).encode("utf-8")
+            content_type = "application/json; charset=utf-8"
+        return status, body, content_type
+
     def do_GET(self) -> None:
         if self.path == "/v1/info":
             self.send_json(200, {"name": APP_NAME, "version": APP_VERSION})
             return
 
         if self.path == "/v1/alpha/info":
-            try:
-                with urlopen(
-                    f"http://{SVC}:8000/v1/info", timeout=5
-                ) as response:
-                    body = response.read()
-                    status = response.status
-                    content_type = response.headers.get(
-                        "Content-Type", "application/json"
-                    )
-            except (HTTPError, URLError, TimeoutError) as error:
-                self.log_error(
-                    "Failed to read alpha service info from %s: %s", SVC, error
-                )
-                self.send_json(502, {"error": "Failed to read alpha service info"})
-                return
-
+            status, body, content_type = self.get_alpha_info()
             self.send_body(status, body, content_type)
             return
 
@@ -54,6 +58,8 @@ class AppHandler(BaseHTTPRequestHandler):
             self.send_error(404)
             return
 
+        _, alpha_body, _ = self.get_alpha_info()
+        alpha_response = escape(alpha_body.decode("utf-8", errors="replace"))
         page = f"""<!doctype html>
 <html lang="en">
 <head>
@@ -83,15 +89,9 @@ class AppHandler(BaseHTTPRequestHandler):
     <hr>
     <footer>Test Beta application</footer>
     <table>
-      <tr><th>Alpha-Response</th><td id="alpha-response">Loading...</td></tr>
+      <tr><th>Alpha-Response</th><td>{alpha_response}</td></tr>
     </table>
   </main>
-  <script>
-    fetch("/v1/alpha/info")
-      .then(response => response.text())
-      .then(value => document.getElementById("alpha-response").textContent = value)
-      .catch(() => document.getElementById("alpha-response").textContent = "Unable to fetch /v1/alpha/info");
-  </script>
 </body>
 </html>
 """
