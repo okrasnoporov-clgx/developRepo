@@ -12,13 +12,6 @@ The `/v1/info` endpoint returns the same information as JSON.
 
 Run locally without a container (PowerShell):
 
-```powershell
-cd python\mesh-istio-test-bg\alpha-test-app
-python app.py
-```
-
-Stop the service with `Ctrl+C` in the terminal where it is running.
-
 To override the values before starting the app:
 
 ```powershell
@@ -26,6 +19,15 @@ $env:APP_NAME = "local-test"
 $env:APP_VERSION = "v.1.2.3"
 python app.py
 ```
+
+```powershell
+cd python\mesh-istio-test-bg\alpha-test-app
+python app.py
+```
+
+Stop the service with `Ctrl+C` in the terminal where it is running.
+
+
 
 In another terminal, open `http://localhost:8000/` or check the HTML response:
 
