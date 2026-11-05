@@ -1,5 +1,5 @@
 [project]
 name = "alpha-test-app"
-version = "0.0.2"
+version = "0.0.3"
 description = "Minimal HTTP service for testing microservices in a cluster"
 requires-python = ">=3.10"
