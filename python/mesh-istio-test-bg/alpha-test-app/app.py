@@ -1,6 +1,6 @@
 import json
 import os
-from datetime import date
+from datetime import datetime
 from html import escape
 from http.server import BaseHTTPRequestHandler, HTTPServer
 
@@ -49,7 +49,7 @@ class AppHandler(BaseHTTPRequestHandler):
     <table>
       <tr><th>Name</th><td>{escape(APP_NAME)}</td></tr>
       <tr><th>Version</th><td>{escape(APP_VERSION)}</td></tr>
-      <tr><th>Date</th><td>{date.today().isoformat()}</td></tr>
+      <tr><th>Date</th><td>{datetime.now().strftime("%Y-%m-%d %H:%M")}</td></tr>
     </table>
     <p>Test application</p>
   </main>
